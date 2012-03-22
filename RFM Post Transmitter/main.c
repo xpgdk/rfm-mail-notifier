@@ -11,6 +11,7 @@
 #include <msp430.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "config.h"
 #include "rfm.h"
 #include "cpu.h"
@@ -23,12 +24,22 @@
 #define PACKET_ACK			0xF2
 #define PACKET_SIGNAL		0xF3
 
-static uint16_t counter = 0;
+static bool measure = true;
+static bool signal = false;
 
 int main(void) {
 	cpu_init();
 	P1IFG = 0x00;
-	//uart_init();
+
+	/* Clock configuration */
+	BCSCTL1 &= ~(XTS); // Low frequency mode
+	BCSCTL1 &= ~(DIVA0|DIVA1);
+	BCSCTL1 |= DIVA_3;
+	BCSCTL3 &= ~(LFXT1S0|LFXT1S1);
+	BCSCTL3 |= LFXT1S_2;
+
+	WDTCTL = WDTPW | WDTTMSEL | WDTCNTCL | WDTSSEL;
+	IE1 |= WDTIE;
 
 	adc_init();
 
@@ -39,15 +50,11 @@ int main(void) {
 
 	__enable_interrupt();
 
-	WDTCTL = WDT_MDLY_32;
-	IE1 |= WDTIE;
-
 	/* Initialize RFM-module */
 	rf12_initialize(2, RF12_433MHZ, 33);
 
-	uint8_t c = 0;
 	//uart_puts("H\n");
-	uint8_t payload[10];
+	char payload[10];
 	unsigned int adc_value;
 
 	while (true) {
@@ -59,9 +66,9 @@ int main(void) {
 			uart_putc(c);
 		}*/
 
-		if (counter > 300) {
+		if (measure) {
 			adc_sensor_read(INCH_1);
-			counter = 0;
+			measure = false;
 		}
 
 		if( adc_read_result(&adc_value)){
@@ -83,7 +90,12 @@ int main(void) {
 
 		/* Power down */
 		// Only power down, if there is nothing to do
-		//__bis_SR_register(LPM0_bits | GIE);
+		if( !adc_result_ready && rxstate == TXIDLE) {
+			rf12_control(RF_SLEEP_MODE);
+			//rf12_sleep(100);
+			__bis_SR_register(LPM3_bits | GIE);
+			rf12_control(RF_IDLE_MODE);
+		}
 	}
 
 	return 0;
@@ -91,7 +103,7 @@ int main(void) {
 
 void __attribute__((interrupt(PORT1_VECTOR)))
 PORT1_ISR(void) {
-	__bic_SR_register_on_exit(LPM0_bits);
+	__bic_SR_register_on_exit(LPM3_bits);
 	if (P1IFG & IRQ) {
 		rf12_interrupt();
 	}
@@ -103,5 +115,6 @@ PORT1_ISR(void) {
 
 void __attribute__((interrupt(WDT_VECTOR)))
 WATCHDOG_ISR(void) {
-	counter++;
+	measure = true;
+	__bic_SR_register_on_exit(LPM3_bits);
 }
