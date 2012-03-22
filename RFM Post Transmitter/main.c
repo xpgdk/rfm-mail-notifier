@@ -32,6 +32,11 @@ int main(void) {
 
 	adc_init();
 
+	P1REN &= ~BIT1;
+
+	/* Let the RF12 module power up completely first */
+	delayMs(1000);
+
 	__enable_interrupt();
 
 	WDTCTL = WDT_MDLY_32;
@@ -55,15 +60,18 @@ int main(void) {
 		}*/
 
 		if (counter > 300) {
-			adc_sensor_read(INCH_11);
+			adc_sensor_read(INCH_1);
 			counter = 0;
 		}
 
 		if( adc_read_result(&adc_value)){
 			if (rf12_canSend()) {
 				//uart_puts("S:");
-
-				itoa(adc_value, payload+1, 10);
+				adc_value *=  5;
+				itoa(adc_value/1023, payload+1, 10);
+				int l = strlen(payload+1);
+				payload[l+1] = '.';
+				itoa((adc_value%1023)/102, payload+2+l,10);
 				//uart_puts(buf);
 				//uart_putc('\n');
 				payload[0] = PACKET_BAT_LEVEL;
