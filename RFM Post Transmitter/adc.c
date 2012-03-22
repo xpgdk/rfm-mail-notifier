@@ -5,7 +5,7 @@
 
 void __attribute__((interrupt(ADC10_VECTOR))) ADC10_ISR(void);
 
-static bool adc_result_ready;
+bool adc_result_ready;
 
 void
 adc_init(void) {
