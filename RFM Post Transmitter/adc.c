@@ -45,5 +45,5 @@ void __attribute__((interrupt(ADC10_VECTOR)))
   ADC10_ISR(void) {
     ADC10CTL0 &= ~(ENC);
     adc_result_ready = true;
-    __bic_SR_register_on_exit(CPUOFF);
+    __bic_SR_register_on_exit(LPM3_bits);
   }
