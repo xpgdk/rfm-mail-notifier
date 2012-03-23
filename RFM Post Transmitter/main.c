@@ -15,11 +15,9 @@
 #include "config.h"
 #include "rfm.h"
 #include "cpu.h"
-
 #include "adc.h"
 
 #define PACKET_BAT_LEVEL 	0xF1
-
 #define PACKET_ACK			0xF2
 #define PACKET_SIGNAL		0xF3
 
@@ -41,10 +39,7 @@ int main(void) {
 
 	adc_init();
 
-	P1REN &= ~BIT1;
-
 	P1REN |= BIT2; /* Enable pull-up/down*/
-	P1IES |= BIT2;
 	P1IFG &= ~BIT2;
 	P1IE |= BIT2; // Enable interrupt for BIT2
 	P1DIR &= ~BIT2; /* Input */
@@ -53,7 +48,6 @@ int main(void) {
 
 	/* Let the RF12 module power up completely first */
 	delayMs(1000);
-
 	__enable_interrupt();
 
 	/* Initialize RFM-module */
@@ -73,11 +67,8 @@ int main(void) {
 		if (adc_read_result(&adc_value)) {
 			ADC10CTL0 &= ~(REFON | ADC10ON);
 			if (rf12_canSend()) {
-				adc_value *= 5;
+				adc_value *= 50;
 				itoa(adc_value / 1023, payload + 1, 10);
-				int l = strlen(payload + 1);
-				payload[l + 1] = '.';
-				itoa((adc_value % 1023) / 102, payload + 2 + l, 10);
 				payload[0] = PACKET_BAT_LEVEL;
 				rf12_sendStart(0, payload, 10);
 			}
