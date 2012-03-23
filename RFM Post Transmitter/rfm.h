@@ -446,7 +446,8 @@ void rf12_interrupt(void) {
         rf12_crc = _crc16_update(rf12_crc, in);
 
         if ((rxfill >= (rf12_len + 5)) || (rxfill >= RF_MAX))
-            rf12_xfer(RF_IDLE_MODE);
+            //rf12_xfer(RF_IDLE_MODE);
+        	rf12_xfer(RF_SLEEP_MODE);
     }//if
 	else {
         uint8_t out;
@@ -462,8 +463,9 @@ void rf12_interrupt(void) {
                 case TXSYN2: out = rf12_grp; rxstate = - (2 + rf12_len); break;
                 case TXCRC1: out = rf12_crc; break;
                 case TXCRC2: out = rf12_crc >> 8; break;
-                case TXDONE: rf12_xfer(RF_IDLE_MODE); // fall through
-                default:     out = 0xAA;
+                case TXDONE: rf12_xfer(RF_SLEEP_MODE);
+                	// fall through
+                default:     out = 0xAA; break;
             }//switch
 		}//else
 
