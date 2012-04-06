@@ -17,7 +17,7 @@ static volatile uint8_t bitCount; // Bit count, used when transmitting byte
 static volatile unsigned int TXByte; // Value sent over UART when uart_putc() is called
 static volatile unsigned int RXByte; // Value recieved once hasRecieved is set
 
-static volatile bool isReceiving = false; // Status for when the device is receiving
+volatile bool isReceiving = false; // Status for when the device is receiving
 static volatile bool hasReceived = false; // Lets the program know when a byte is received
 
 /****************************************************************/
