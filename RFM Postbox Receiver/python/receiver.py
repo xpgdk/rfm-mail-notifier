@@ -6,6 +6,9 @@ import time
 import sys
 import smtplib
 import string
+import os
+
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
 def notify():
   SUBJECT = "Ny post"
@@ -23,41 +26,42 @@ def notify():
   server.sendmail(FROM, [TO], BODY)
   server.quit()
 
-s = serial.Serial("/dev/ttyUSB0", 9600)
 
-def readMsg(s):
-  r = ""
-  t = ""
-  print "Readable:",s.readable()
-  while t != "\n":
-    t = s.read(1)
-    print "R:",t
-    r = r + t
-  return r[:-1]
-
-firstRun = True
+def run(s):
+  firstRun = True
+  
+  while True:
+    if firstRun:
+      print "Initializing"
+  
+    s.write("I")
+  
+    resp = s.read(2)
+  
+    if resp != "O\n":
+      print "Failed"
+      raise Exception("Failed")
+  
+    if firstRun:
+      print "Done"
+  
+    msg = s.readline()
+    if len(msg) > 1:
+      msg = msg[:-1]
+      print time.ctime(),"-", msg
+      if msg.startswith("SIGNAL:"):
+        notify()
+  
+    time.sleep(2)
+    firstRun = False
 
 while True:
-  if firstRun:
-    print "Initializing"
-
-  s.write("I")
-
-  resp = s.read(2)
-
-  if resp != "O\n":
-    print "Failed"
-    sys.exit(1)
-
-  if firstRun:
-    print "Done"
-
-  msg = s.readline()
-  if len(msg) > 1:
-    msg = msg[:-1]
-    print time.ctime(),"-", msg
-    if msg.startswith("SIGNAL:"):
-      notify()
-
-  time.sleep(2)
-  firstRun = False
+  s = None
+  try:
+    s = serial.Serial("/dev/ttyUSB0", 9600)
+    run(s)
+  except Exception (e):
+    print e
+    if s != None:
+      s.close()
+    continue
