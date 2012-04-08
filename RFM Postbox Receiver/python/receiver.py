@@ -46,22 +46,14 @@ def run(s):
       print "Done"
   
     msg = s.readline()
+    print time.ctime(),"-", msg
     if len(msg) > 1:
       msg = msg[:-1]
-      print time.ctime(),"-", msg
       if msg.startswith("SIGNAL:"):
         notify()
   
     time.sleep(2)
     firstRun = False
 
-while True:
-  s = None
-  try:
-    s = serial.Serial("/dev/ttyUSB0", 9600)
-    run(s)
-  except Exception (e):
-    print e
-    if s != None:
-      s.close()
-    continue
+s = serial.Serial("/dev/ttyUSB0", 9600)
+run(s)
