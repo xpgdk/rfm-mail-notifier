@@ -53,29 +53,22 @@ int main(void) {
 				break;
 			}
 			uart_putc('\n');
-
-			/* Next, send back a response, to let the other end know
-			 * that we are hearing it loud and clear */
-			//sendAck = true;
 		}
-/*		if (sendAck == true && rf12_canSend()) {
-			sendAck = false;
-			payload[0] = PACKET_ACK;
-			rf12_sendStart(0, payload, 1);
-		}*/
+
 
 		if (uart_getc(&c)) {
 			if( c == 'I' ) {
 				uart_putc('O');
 				uart_putc('\n');
 			}
-			//sendAck = true;
 		}
 
 		/* Power down */
 		// Only power down, if there is nothing to do
-		if( !isReceiving)
+
+		if( !isReceiving && rxstate == TXRECV) {
 			__bis_SR_register(LPM3_bits | GIE);
+		}
 	}
 
 	return 0;
