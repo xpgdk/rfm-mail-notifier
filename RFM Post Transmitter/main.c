@@ -79,14 +79,18 @@ int main(void) {
 			ADC10CTL0 &= ~(REFON | ADC10ON);
 			if (rf12_canSend()) {
 				adc_value *= 50;
-				itoa(adc_value / 1023, payload + 1, 10);
+				adc_value /= 1023;
+				//itoa(adc_value / 1023, payload + 1, 10);
+
+				payload[1] = (adc_value >> 8) & 0xFF;
+				payload[2] = (adc_value) & 0xFF;
 
 				if( sendSignal ) {
 					payload[0] = PACKET_SIGNAL;
 				} else {
 					payload[0] = PACKET_BAT_LEVEL;
 				}
-				rf12_sendStart(0, payload, 10);
+				rf12_sendStart(0, payload, 3);
 			}
 			sendSignal = false;
 		} /*else if (sendSignal) {
