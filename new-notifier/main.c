@@ -22,7 +22,8 @@ const static char httpResponseHeader[] = "HTTP/1.1 200 OK\r\n"
                                         "Content-Type: application/json\r\n\r\n"
                                         "{'time': $NET_TIME$,"
                                         " 'temperature': $TEMP$,"
-                                        " 'requestPath': '$REQUEST$'"
+                                        " 'notificationTime': $N_TIME$,"
+                                        " 'batteryLevel': $BATLEVEL$"
                                         "}";
 
 const static char httpRequest[] = "GET /post-notify.php HTTP/1.0\r\n"
@@ -43,7 +44,7 @@ static uint16_t         last_measurement = -1;*/
 static uint16_t         batLevel = 0;
 static bool             sendSignal = false;
 static bool             sendRequest = false;
-static uint16_t         notificationCounter = 0;
+static uint16_t         lastNotificationTime = 0;
 
 void tcp_send_int(int socket, uint16_t i) {
   uint8_t buf[7] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
@@ -87,6 +88,10 @@ void tcp_send_template_data(int socket, const char *buf, uint16_t count) {
 #endif
         } else if (strncmp(buf, "REQUEST", 7) == 0) {
           //tcp_send_data(socket, requestPath, strlen(requestPath));
+        } else if (strncmp(buf, "BATLEVEL", 8) == 0) {
+          tcp_send_int(socket, batLevel);
+        } else if (strncmp(buf, "N_TIME", 6) == 0) {
+          tcp_send_int(socket, lastNotificationTime);
         }
         e++;
       }
@@ -151,7 +156,7 @@ int main(void) {
   net430_init(mac_addr);
 
   /* Initialize RFM-module */
-  rf12_initialize(3, RF12_433MHZ, 33);
+  rf12_initialize(2, RF12_433MHZ, 33);
 
   int server_sock = tcp_socket(server_callback, 500);
   int client_socket = tcp_socket(client_callback, 20);
@@ -190,32 +195,26 @@ int main(void) {
 
     if (sendSignal) {
       uint8_t addr[16];
-      debug_puts("Button pressed");
-      debug_nl();
-      notificationCounter++;
+      lastNotificationTime = net_get_time();
       net_get_address(ADDRESS_STORE_MAIN_OFFSET, addr);
       tcp_connect(client_socket, addr, dst, 80);
       sendSignal = false;
     }
+#endif
 
     if (rf12_recvDone()) {
       if (rf12_crc == 0) {
-        debug_puts("Got RF12 packet: ");
+        debug_puts("NET430 Got RF12 packet: ");
         debug_puthex(rf12_data[0]);
         debug_nl();
         if (rf12_data[0] == PACKET_SIGNAL) {
           batLevel = rf12_data[1] << 8 | rf12_data[2];
-          debug_puts("BAT LEVEL: ");
-          debug_puthex(batLevel);
-          //debug_puts(rf12_data + 1);
-          debug_nl();
           sendSignal = true;
         } else if( rf12_data[0] == PACKET_BAT_LEVEL) {
           batLevel = rf12_data[1] << 8 | rf12_data[2];
         }
       }
     }
-#endif
 
     if (enc_idle ) {
       __bis_SR_register(CPUOFF | GIE);
