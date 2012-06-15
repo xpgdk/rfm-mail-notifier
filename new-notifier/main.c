@@ -14,8 +14,8 @@
 
 const uint8_t mac_addr[] = {0x00, 0xC0, 0x033, 0x50, 0x48, 0x10};
 
-const static uint8_t dst[] = {0x26, 0x07, 0xF2, 0x98, 0x00, 0x02, 0x01, 0x20,
-                              0x00, 0x00, 0x00, 0x00, 0x02, 0x43, 0xA6, 0x58};
+const static uint8_t dst[] = {0x20, 0x01, 0x16, 0xd8, 0xdd, 0xaa, 0x00, 0x01,
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
 
 const static char httpResponseHeader[] = "HTTP/1.1 200 OK\r\n"
                                         "Server: net430\r\n"
@@ -27,7 +27,7 @@ const static char httpResponseHeader[] = "HTTP/1.1 200 OK\r\n"
                                         "}";
 
 const static char httpRequest[] = "GET /post-notify.php HTTP/1.0\r\n"
-                                  "Host: script.xpg.dk\r\n\r\n";
+                                  "Host: home.xpg.dk\r\n\r\n";
 //"Host: localhost\r\n\r\n";
 
 enum HttpState {
