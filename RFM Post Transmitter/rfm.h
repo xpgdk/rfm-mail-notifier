@@ -347,7 +347,7 @@ static void rf12_recvStart () {
         rf12_crc = _crc16_update(~0, group);
 #endif
     rxstate = TXRECV;
-    rf12_xfer(RF_RECEIVER_ON);
+    rf12_xfer(RF_SLEEP_MODE);
 }
 
 //______________________________________________________________________
@@ -463,7 +463,7 @@ void rf12_interrupt(void) {
                 case TXSYN2: out = rf12_grp; rxstate = - (2 + rf12_len); break;
                 case TXCRC1: out = rf12_crc; break;
                 case TXCRC2: out = rf12_crc >> 8; break;
-                case TXDONE: rf12_xfer(RF_SLEEP_MODE);
+                case TXDONE: rf12_xfer(RF_IDLE_MODE);
                 	// fall through
                 default:     out = 0xAA; break;
             }//switch
