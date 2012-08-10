@@ -1,6 +1,9 @@
 // RFM12B driver implementation
 // 2009-02-09 <jcw@equi4.com> http://opensource.org/licenses/mit-license.php
 // 2011-09-19 <simpleavr@gmail.com> http://opensource.org/licenses/mit-license.php
+// 2012-08-10 <paul@xpg.dk> http://opensource.org/licenses/mit-license.php
+//                          Minor tweaks to fit my needs
+
 
 /*
 2011.09.19
