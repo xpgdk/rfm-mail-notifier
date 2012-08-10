@@ -77,6 +77,7 @@ int main(void) {
 
 		if (adc_read_result(&adc_value)) {
 			ADC10CTL0 &= ~(REFON | ADC10ON);
+
 			if (rf12_canSend()) {
 				adc_value *= 50;
 				adc_value /= 1023;
@@ -118,7 +119,6 @@ PORT1_ISR(void) {
 	__bic_SR_register_on_exit(LPM3_bits);
 	if (P1IFG & IRQ) {
 		rf12_interrupt();
-
 	}
 	if (P1IFG & BIT0) {
 		P1IE &= ~BIT0; // Disable interrupt for BIT2
