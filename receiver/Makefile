@@ -1,7 +1,7 @@
 NET430_DIR=../net/net430
 IP430_DIR=../net/ip430
 include $(NET430_DIR)/net430.mk
-PROG=notifier
+PROG=receiver
 MCU=-mmcu=msp430g2553
 DEFINES=-DHAVE_TCP \
 	-DUDP_LOG
