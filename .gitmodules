@@ -1,0 +1,3 @@
+[submodule "net"]
+	path = net
+	url = https://github.com/xpgdk/net430.git
