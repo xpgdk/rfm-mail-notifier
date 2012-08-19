@@ -1,0 +1,3 @@
+[submodule "net"]
+	path = net
+	url = ssh://paul@home.xpg.dk:2222/share/git/net430
